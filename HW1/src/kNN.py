@@ -1,7 +1,7 @@
 """
-k-Nearest Neighbor
+k-Nearest Neighbor with euclidian distance and DTW
 """
-#%%
+
 
 import numpy as np
 from scipy.stats import mode
@@ -67,8 +67,36 @@ def euclidean_distance_matrix(train_X, test_X):
             distance_matrix[I][i] = distance
     return distance_matrix
 
-def dynamic_time_warping():
-    pass
+def dtw(q, c, w=None):
+    """
+    Compute dynamic time warping distance between two time series 
+    
+    Parameters
+    ----------
+    
+    q: numpy array
+    Query, one time series
+    
+    c: numpy array
+    Candidate, one time series
+    
+    w: int, default None
+    Warping window constraint. Values are [0,100], where w=10 would mean
+    a warping window width of 10% the length of the time series
+    """
+    # compute initial matrix by row in a q by c matrix
+    
+    distance_matrix = np.zeros((len(q), len(c)))
+    for index_i, i in enumerate(q):
+        for index_j, j in enumerate(c):
+            sq_dist = (i-j)**2
+            distance_matrix[index_i][index_j] = sq_dist
+        break
+    
+    
+    
+    return dtw_dist
+    
 
 
 def kNN(k=1, train_X=None, train_y=None, test_X=None, distance_measure=None, window = None):
@@ -131,9 +159,7 @@ def kNN(k=1, train_X=None, train_y=None, test_X=None, distance_measure=None, win
                 predicted_y.append(label)
             
     elif distance_measure == "dtw": # dynamic time warping
-        for index, line in enumerate(test_X):
-            
-            pass
+        dtw_matrix
             
     return np.array(predicted_y)
 
@@ -155,7 +181,7 @@ def accuracy(predicted_y, test_y):
         raise IndexError("predicted_y and test_y are not the same length")
     return (np.sum(predicted_y == test_y))/len(predicted_y)
 
-#%%
+
 
 # euclidian distance assesment for k=1
 k1_euc_accuracy = []
@@ -167,7 +193,7 @@ for i in range(4):
     k1_euc_accuracy.append(accuracy(predicted_y, test_y))
     print(k1_euc_accuracy)
     
-#%%
+
 
 # euclidian distance assesment for k=5
 k5_euc_accuracy = []
@@ -179,7 +205,7 @@ for i in range(4):
     k5_euc_accuracy.append(accuracy(predicted_y, test_y))
     print(k5_euc_accuracy)
     
-#%%
+
 
 
 
