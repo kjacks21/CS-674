@@ -5,6 +5,7 @@ k-Nearest Neighbor with euclidian distance and DTW
 
 import numpy as np
 from scipy.stats import mode
+from math import sqrt
 
 home_dir = "/home/kyle/Documents/CS-674/HW1/hw1_datasets/hw1_datasets"
 
@@ -50,22 +51,13 @@ def read_train(train_path):
 
     return train_X, train_y
 
-def euclidean_distance_matrix(train_X, test_X):
+def euclidean_dist(q, c):
     """
-    Pre-compute euclidian distance between test and train files.
-    
-    Returns
-    -------
-    distance_matrix: numpy array of dimensions N x n, where N is the number of
-    time series in test_X and n is the number time series in train_X
+    Compute euclidean distance    
     """
-    distance_matrix = np.zeros((test_X.shape[0], train_X.shape[0]))
-    
-    for i, n in enumerate(train_X):
-        for I, N in enumerate(test_X):
-            distance = (np.sum((n-N)**2))**(1/2)
-            distance_matrix[I][i] = distance
-    return distance_matrix
+    return sqrt(np.sum((q-c)**2))
+
+
 
 def dtw(q, c, w=None):
     """
@@ -84,20 +76,74 @@ def dtw(q, c, w=None):
     Warping window constraint. Values are [0,100], where w=10 would mean
     a warping window width of 10% the length of the time series
     """
-    # compute initial matrix by row in a q by c matrix
-    
-    distance_matrix = np.zeros((len(q), len(c)))
+    # compute initial distance matrix by row in q by c matrix
+    # d == distance
+    d = np.zeros((len(q), len(c)))
+    g = np.copy(d)
     for index_i, i in enumerate(q):
         for index_j, j in enumerate(c):
             sq_dist = (i-j)**2
-            distance_matrix[index_i][index_j] = sq_dist
-        break
+            d[index_i][index_j] = sq_dist
     
+    # if w == 0, no constraint
     
+    # g == gamma, where g is cumulative distance of d(i,j) and minimum cumulative
+    # distances from three adjacent cells
+    # get initial cumulative distances
+    g[0,0] = d[0,0]
     
+    if w == None:
+        # first column  
+        for i in range(1, len(q)):           
+            g[i,0] = d[i,0] + g[i-1,0]
+        # first row
+        for j in range(1, len(c)): 
+            g[0,j] = d[0,j] + g[0,j-1]
+        # fill in rest of grid
+        for i in range(1, len(q)):
+            for j in range(1, len(c)):
+                g[i,j] = d[i,j] + min(g[i-1,j-1], g[i-1,j], g[i,j-1]) # diag, up, left
+                
+        dtw_dist = sqrt(g[-1,-1])    
+    else:
+        w = int((w/100)*len(q))
+        for i in range(1, w): # first column            
+            g[i,0] = d[i,0] + g[i-1,0] 
+        for j in range(1, w): # first row
+            g[0,j] = d[0,j] + g[0,j-1]
+        
     return dtw_dist
-    
 
+def distance_matrix(train_X, test_X, distance_metric, w):
+    """
+    Pre-compute euclidian distance between test and train files.
+    
+    Parameters
+    ----------
+    distance_metric: string, either "euc" or "dtw"
+    
+    w: int
+    window size
+    
+    Returns
+    -------
+    distance_matrix: numpy array of dimensions N x n, where N is the number of
+    time series in test_X and n is the number time series in train_X
+    """
+    distance_matrix = np.zeros((test_X.shape[0], train_X.shape[0]))
+    if distance_metric == "euc":
+        for i, n in enumerate(train_X):
+            for I, N in enumerate(test_X):
+                distance = euclidean_dist(N,n)
+                distance_matrix[I][i] = distance
+                               
+    elif distance_metric == "dtw":
+        for i, n in enumerate(train_X):
+            for I, N in enumerate(test_X):
+                print(i,I)
+                distance = dtw(N,n,w=w)
+                distance_matrix[I][i] = distance
+    return distance_matrix
 
 def kNN(k=1, train_X=None, train_y=None, test_X=None, distance_measure=None, window = None):
     """
@@ -137,14 +183,14 @@ def kNN(k=1, train_X=None, train_y=None, test_X=None, distance_measure=None, win
     # euclidean distance
     if distance_measure == "euclidean": 
         if k == 1: # 1-NN
-            dist_matrix = euclidean_distance_matrix(train_X, test_X)
+            dist_matrix = distance_matrix(train_X, test_X, distance_metric = "euc", w=None)
             print("dist_matrix computed, moving onto classification")
             for i in dist_matrix:
                 label = train_y[np.argmin(i)] # get index of min distance between test time series and all time series in train
                 predicted_y.append(label)        
             
         elif k > 1: # k-NN
-            dist_matrix = euclidean_distance_matrix(train_X, test_X)
+            dist_matrix = distance_matrix(train_X, test_X, distance_metric = "euc", w=None)
             print("dist_matrix computed, moving onto classification")
             for i in dist_matrix:
                 smallest_indices = np.argsort(i)[:k]
@@ -159,7 +205,12 @@ def kNN(k=1, train_X=None, train_y=None, test_X=None, distance_measure=None, win
                 predicted_y.append(label)
             
     elif distance_measure == "dtw": # dynamic time warping
-        dtw_matrix
+        # compute differences for all train and test time series
+        dist_matrix = distance_matrix(train_X, test_X, distance_metric = "dtw", w=window)
+        for i in dist_matrix:
+            print(i)
+            label = train_y[np.argmin(i)] # get index of min distance between test time series and all time series in train
+            predicted_y.append(label)  
             
     return np.array(predicted_y)
 
@@ -181,7 +232,7 @@ def accuracy(predicted_y, test_y):
         raise IndexError("predicted_y and test_y are not the same length")
     return (np.sum(predicted_y == test_y))/len(predicted_y)
 
-
+#%%
 
 # euclidian distance assesment for k=1
 k1_euc_accuracy = []
@@ -189,11 +240,11 @@ for i in range(4):
     dataset_index = i + 1
     test_X, test_y = read_test("/dataset"+str(dataset_index)+"/test.txt")
     train_X, train_y = read_train("/dataset"+str(dataset_index)+"/train.txt")
-    predicted_y = kNN(k=1, train_X = train_X, train_y=train_y, test_X=test_X, distance_measure='euclidean')     
+    predicted_y = kNN(k=1, train_X = train_X, train_y=train_y, test_X=test_X, distance_measure='euclidean', window=None)     
     k1_euc_accuracy.append(accuracy(predicted_y, test_y))
     print(k1_euc_accuracy)
     
-
+#%%
 
 # euclidian distance assesment for k=5
 k5_euc_accuracy = []
@@ -201,14 +252,22 @@ for i in range(4):
     dataset_index = i + 1
     test_X, test_y = read_test("/dataset"+str(dataset_index)+"/test.txt")
     train_X, train_y = read_train("/dataset"+str(dataset_index)+"/train.txt")
-    predicted_y = kNN(k=5, train_X = train_X, train_y=train_y, test_X=test_X, distance_measure='euclidean')     
+    predicted_y = kNN(k=5, train_X = train_X, train_y=train_y, test_X=test_X, distance_measure='euclidean', window=None)     
     k5_euc_accuracy.append(accuracy(predicted_y, test_y))
     print(k5_euc_accuracy)
     
+#%%
+# dtw distance assesment for k=1
+k1_dtw_accuracy = []
+for i in range(4):
+    dataset_index = i + 1
+    test_X, test_y = read_test("/dataset"+str(dataset_index)+"/test.txt")
+    train_X, train_y = read_train("/dataset"+str(dataset_index)+"/train.txt")
+    predicted_y = kNN(k=1, train_X = train_X, train_y=train_y, test_X=test_X, distance_measure='dtw', window=None)     
+    k1_dtw_accuracy.append(accuracy(predicted_y, test_y))
+    print(k1_dtw_accuracy)
 
-
-
-
+#%%
 
 
 
