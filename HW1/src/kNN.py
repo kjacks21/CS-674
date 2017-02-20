@@ -92,6 +92,7 @@ def dtw(q, c, w=None):
     # get initial cumulative distances
     g[0,0] = d[0,0]
     
+    # if no window constraint
     if w == None:
         # first column  
         for i in range(1, len(q)):           
@@ -104,13 +105,25 @@ def dtw(q, c, w=None):
             for j in range(1, len(c)):
                 g[i,j] = d[i,j] + min(g[i-1,j-1], g[i-1,j], g[i,j-1]) # diag, up, left
                 
-        dtw_dist = sqrt(g[-1,-1])    
+        dtw_dist = sqrt(g[-1,-1])  
+        
+    # if window constraint
     else:
-        w = int((w/100)*len(q))
-        for i in range(1, w): # first column            
+        w = int(round((w/100)*len(q)))
+        for i in range(1, w): # first column
             g[i,0] = d[i,0] + g[i-1,0] 
         for j in range(1, w): # first row
             g[0,j] = d[0,j] + g[0,j-1]
+        for i in range(1, len(q)):
+            for j in range(1, len(c)):
+                if i >= j + w:
+                    pass
+                elif i <= j - w:
+                    pass
+                else:
+                    g[i,j] = d[i,j] + min(g[i-1,j-1], g[i-1,j], g[i,j-1]) # diag, up, left
+                
+        dtw_dist = sqrt(g[-1,-1]) 
         
     return dtw_dist
 
@@ -208,7 +221,6 @@ def kNN(k=1, train_X=None, train_y=None, test_X=None, distance_measure=None, win
         # compute differences for all train and test time series
         dist_matrix = distance_matrix(train_X, test_X, distance_metric = "dtw", w=window)
         for i in dist_matrix:
-            print(i)
             label = train_y[np.argmin(i)] # get index of min distance between test time series and all time series in train
             predicted_y.append(label)  
             
@@ -236,7 +248,7 @@ def accuracy(predicted_y, test_y):
 
 # euclidian distance assesment for k=1
 k1_euc_accuracy = []
-for i in range(4):
+for i in range(5):
     dataset_index = i + 1
     test_X, test_y = read_test("/dataset"+str(dataset_index)+"/test.txt")
     train_X, train_y = read_train("/dataset"+str(dataset_index)+"/train.txt")
@@ -248,7 +260,7 @@ for i in range(4):
 
 # euclidian distance assesment for k=5
 k5_euc_accuracy = []
-for i in range(4):
+for i in range(5):
     dataset_index = i + 1
     test_X, test_y = read_test("/dataset"+str(dataset_index)+"/test.txt")
     train_X, train_y = read_train("/dataset"+str(dataset_index)+"/train.txt")
@@ -259,7 +271,7 @@ for i in range(4):
 #%%
 # dtw distance assesment for k=1
 k1_dtw_accuracy = []
-for i in range(4):
+for i in range(5):
     dataset_index = i + 1
     test_X, test_y = read_test("/dataset"+str(dataset_index)+"/test.txt")
     train_X, train_y = read_train("/dataset"+str(dataset_index)+"/train.txt")
@@ -269,6 +281,15 @@ for i in range(4):
 
 #%%
 
+# dtw with window constraint of 10
+k1_dtw_w_accuracy = []
+for i in range(5):
+    dataset_index = i + 1
+    test_X, test_y = read_test("/dataset"+str(dataset_index)+"/test.txt")
+    train_X, train_y = read_train("/dataset"+str(dataset_index)+"/train.txt")
+    predicted_y = kNN(k=1, train_X = train_X, train_y=train_y, test_X=test_X, distance_measure='dtw', window=20)     
+    k1_dtw_w_accuracy.append(accuracy(predicted_y, test_y))
+    print(k1_dtw_w_accuracy)
 
 
 
