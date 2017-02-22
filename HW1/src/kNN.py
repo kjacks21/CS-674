@@ -264,7 +264,7 @@ for i in range(5):
     dataset_index = i + 1
     test_X, test_y = read_test("/dataset"+str(dataset_index)+"/test.txt")
     train_X, train_y = read_train("/dataset"+str(dataset_index)+"/train.txt")
-    predicted_y = kNN(k=5, train_X = train_X, train_y=train_y, test_X=test_X, distance_measure='euclidean', window=None)     
+    predicted_y = kNN(k=10, train_X = train_X, train_y=train_y, test_X=test_X, distance_measure='euclidean', window=None)     
     k5_euc_accuracy.append(accuracy(predicted_y, test_y))
     print(k5_euc_accuracy)
     
@@ -281,15 +281,15 @@ for i in range(5):
 
 #%%
 
-# dtw with window constraint of 10
+# dtw with window constraint of 20
 k1_dtw_w_accuracy = []
 for i in range(5):
     dataset_index = i + 1
     test_X, test_y = read_test("/dataset"+str(dataset_index)+"/test.txt")
     train_X, train_y = read_train("/dataset"+str(dataset_index)+"/train.txt")
     predicted_y = kNN(k=1, train_X = train_X, train_y=train_y, test_X=test_X, distance_measure='dtw', window=20)     
-    k1_dtw_w_accuracy.append(accuracy(predicted_y, test_y))
-    print(k1_dtw_w_accuracy)
+    k1_dtw_w_accuracyy.append(accuracy(predicted_y, test_y))
+    print(k1_dtw_w_accuracyy)
 
 
 
