@@ -3,3 +3,5 @@ My projects in [CS 674: Data Mining on Multimedia Data](http://cs.gmu.edu/~jessi
 
 ## Assignments
 Homework 1: For time series data, implement 1-NN and _k_-NN with Euclidean distance and Dynamic Time Warping (DTW). DTW should include both the base version and with a warping window constraint _w_.
+
+Homework 2: Use time series motif discovery for classification.
