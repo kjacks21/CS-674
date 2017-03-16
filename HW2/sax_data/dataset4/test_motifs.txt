@@ -1,0 +1,4 @@
+"31aaaab"	"91aaaab"	" 1ccccc"	"61ccccc"	"31aaaab"	"91aaaab"	" 1ccccc"	"61ccccc"
+" 21aaaaa"	" 31aaaaa"	" 91aaaaa"	"101aaaaa"	" 1ccccc"	"61ccccc"	" 21aaaaa"	" 31aaaaa"
+"41aaaaa"	"51aaaaa"	"91aaaaa"	" 1ccccc"	"11ccccc"	"71ccccc"	"41aaaaa"	"51aaaaa"
+"  1ccccc"	" 61ccccc"	"111ccccc"	" 11bbbbb"	"101bbbbb"	"31aaaaa"	"41aaaaa"	"81aaaaa"
