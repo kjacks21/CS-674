@@ -19,5 +19,6 @@ def convert(records):
 
     return sp.coo_matrix((data, (i,j))).tocsr()
 
-data_array = np.load("/media/kyle/My Passport/cs674/nytimes_data.npy")
-np.save("/media/kyle/My Passport/cs674/csr_data", convert(data_array))
+if __name__ == "__main__":
+    data_array = np.load("/media/kyle/My Passport/cs674/nytimes_data.npy")
+    np.save("/media/kyle/My Passport/cs674/csr_data", convert(data_array))
