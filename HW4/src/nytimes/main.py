@@ -1,8 +1,6 @@
 import numpy as np
 from np_to_coomatrix import convert
 import pickle
-#import gensim
-#from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.decomposition import LatentDirichletAllocation as LDA
 from print_top_words import print_top_words
 
@@ -15,25 +13,34 @@ from print_top_words import print_top_words
 # docID wordID count
 # row column data
 
-tf = np.load("/media/kyle/My Passport/cs674/nytimes_data.npy")
+print("reading in data")
+raw_tf = np.load("/media/kyle/My Passport/cs674/nytimes_data.npy")
 with open("/media/kyle/My Passport/cs674/vocab_nytimes.pickle", "rb") as handle:
     vocab = pickle.load(handle)
 
-#transformer = TfidfTransformer()
-#tfidf_matrix = transformer.fit_transform(tf)
+print("converting data to term frequency matrix")
+term_freq_matrix = convert(raw_tf)
+
+lda2 = LDA(n_topics=10, learning_method='batch',max_iter=2,n_jobs=-1, verbose=1, random_state=2017)
+lda5  = LDA(n_topics=10, learning_method='batch',max_iter=5,n_jobs=-1, verbose=1, random_state=2017)
+lda10 = LDA(n_topics=10, learning_method='batch',max_iter=10,n_jobs=-1, verbose=1, random_state=2017)
+lda20 = LDA(n_topics=10, learning_method='batch',max_iter=20,n_jobs=-1, verbose=1, random_state=2017)
 
 print("Fitting LDA")
-lda = LDA(n_jobs=-1, verbose=1, random_state=2017)
-lda.fit(tf)
+instances = {
+    'lda2' : lda2,
+    'lda5' : lda5,
+    'lda10' : lda10,
+    'lda20' : lda20
+}
 
-print_top_words(lda, vocab, n_top_words = 15)
+results = {}
+for i in [2,5,10,20]:
+    print("Starting lda with"+str(i)+"epochs")
+    lda_iter = 'lda'+str(i)
+    results[lda_iter] = instances[lda_iter].fit(term_freq_matrix)
+    print_top_words(instances[lda_iter], vocab, n_top_words = 15)
 
-
-"""    
-# gensim, tf
-data = convert(tf)
-corpus = gensim.matutils.Sparse2Corpus(data)
-
-lda = gensim.models.ldamodel.LdaModel(corpus=corpus, id2word=vocab, num_topics=10)
-lda.print_topics(num_topics=20, num_words=10)
-"""
+print("saving results to pickle")
+with open("/media/kyle/My Passport/cs674/results.pickle", 'wb') as handle:
+    pickle.dump(results, handle, protocol=pickle.HIGHEST_PROTOCOL)
