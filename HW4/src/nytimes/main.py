@@ -22,10 +22,10 @@ with open("/media/kyle/My Passport/cs674/vocab_nytimes.pickle", "rb") as handle:
 print("converting data to term frequency matrix")
 term_freq_matrix = convert(raw_tf)
 
-lda2 = LDA(n_topics=10, learning_method='batch',max_iter=2,n_jobs=-1, verbose=1, random_state=2017)
-lda5  = LDA(n_topics=10, learning_method='batch',max_iter=5,n_jobs=-1, verbose=1, random_state=2017)
-lda10 = LDA(n_topics=10, learning_method='batch',max_iter=10,n_jobs=-1, verbose=1, random_state=2017)
-lda20 = LDA(n_topics=10, learning_method='batch',max_iter=20,n_jobs=-1, verbose=1, random_state=2017)
+lda2 = LDA(n_topics=10, learning_method='batch',max_iter=2,n_jobs=3, verbose=1, random_state=2017)
+lda5  = LDA(n_topics=10, learning_method='batch',max_iter=5,n_jobs=3, verbose=1, random_state=2017)
+lda10 = LDA(n_topics=10, learning_method='batch',max_iter=10,n_jobs=3, verbose=1, random_state=2017)
+lda20 = LDA(n_topics=10, learning_method='batch',max_iter=20,n_jobs=3, verbose=1, random_state=2017)
 
 print("Fitting LDA")
 instances = {
@@ -35,16 +35,18 @@ instances = {
     'lda20' : lda20
 }
 
+output_file = open("/media/kyle/My Passport/cs674/output.txt", 'w')
 results = {}
 for i in [2,5,10,20]:
     start = time.time()
-    print("Starting lda with", str(i), "epochs")
+    print("Starting lda with %d epochs" % (i))
     lda_iter = 'lda'+str(i)
     results[lda_iter] = instances[lda_iter].fit(term_freq_matrix)
-    print_top_words(instances[lda_iter], vocab, n_top_words = 15)
+    print_top_words(instances[lda_iter], vocab, n_top_words = 15, output_file = output_file)
     end = time.time()
     print("time elapsed:", str(end-start))
 
+output_file.close()
 print("saving results to pickle")
 with open("/media/kyle/My Passport/cs674/results.pickle", 'wb') as handle:
     pickle.dump(results, handle, protocol=pickle.HIGHEST_PROTOCOL)
