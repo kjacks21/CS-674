@@ -1,14 +1,12 @@
 import numpy as np
 from np_to_coomatrix import convert
-from print_top_words import print_top_words
-from sklearn.feature_extraction.text import TfidfTransformer
+import pickle
+#import gensim
+#from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.decomposition import LatentDirichletAllocation as LDA
+from print_top_words import print_top_words
 
-# http://scikit-learn.org/stable/modules/generated/sklearn.decomposition.LatentDirichletAllocation.html
-# http://scikit-learn.org/stable/auto_examples/applications/topics_extraction_with_nmf_lda.html#sphx-glr-auto-examples-applications-topics-extraction-with-nmf-lda-py
-# http://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.TfidfVectorizer.html#sklearn.feature_extraction.text.TfidfVectorizer
-
-# todo convert 
+# todo convert
 # D 300000
 # W 102660
 # NNZ 69679427
@@ -18,23 +16,24 @@ from sklearn.decomposition import LatentDirichletAllocation as LDA
 # row column data
 
 tf = np.load("/media/kyle/My Passport/cs674/nytimes_data.npy")
+with open("/media/kyle/My Passport/cs674/vocab_nytimes.pickle", "rb") as handle:
+    vocab = pickle.load(handle)
+
+#transformer = TfidfTransformer()
+#tfidf_matrix = transformer.fit_transform(tf)
+
+print("Fitting LDA")
+lda = LDA(n_jobs=-1, verbose=1, random_state=2017)
+lda.fit(tf)
+
+print_top_words(lda, vocab, n_top_words = 15)
+
+
+"""    
+# gensim, tf
 data = convert(tf)
+corpus = gensim.matutils.Sparse2Corpus(data)
 
-# convert term frequency matrix to tf-idf representation
-transformer = TfidfTransformer()
-tfidf = transformer.fit_transform(data)
-
-lda_tf = LDA(random_state=2017)
-lda_tf.fit(tf)
-
-
-lda_tfidf = LDA(random_state=2017)
-lda_tfidf.fit(tfidf)
-
-print("Topics in LDA-tf model:")
-tf_feature_names = transformer.get_feature_names()
-print_top_words(lda_tf, tf_feature_names, 20)
-
-print("\nTopics in LDA-tfidf model:")
-tfidf_feature_names = transformer.get_feature_names()
-print_top_words(lda_tfidf, tfidf_feature_names, 20)
+lda = gensim.models.ldamodel.LdaModel(corpus=corpus, id2word=vocab, num_topics=10)
+lda.print_topics(num_topics=20, num_words=10)
+"""

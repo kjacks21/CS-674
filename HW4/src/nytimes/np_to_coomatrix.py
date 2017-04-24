@@ -13,8 +13,8 @@ def convert(records):
     j = [] # column
 
     for n in records:
-        i.append(n[0])
-        j.append(n[1])
+        i.append(n[0] - 1)
+        j.append(n[1] - 1)
         data.append(n[2])
 
     return sp.coo_matrix((data, (i,j))).tocsr()
