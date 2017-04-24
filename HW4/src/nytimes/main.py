@@ -3,6 +3,7 @@ from np_to_coomatrix import convert
 import pickle
 from sklearn.decomposition import LatentDirichletAllocation as LDA
 from print_top_words import print_top_words
+import time
 
 # todo convert
 # D 300000
@@ -36,10 +37,13 @@ instances = {
 
 results = {}
 for i in [2,5,10,20]:
-    print("Starting lda with"+str(i)+"epochs")
+    start = time.time()
+    print("Starting lda with", str(i), "epochs")
     lda_iter = 'lda'+str(i)
     results[lda_iter] = instances[lda_iter].fit(term_freq_matrix)
     print_top_words(instances[lda_iter], vocab, n_top_words = 15)
+    end = time.time()
+    print("time elapsed:", str(end-start))
 
 print("saving results to pickle")
 with open("/media/kyle/My Passport/cs674/results.pickle", 'wb') as handle:
