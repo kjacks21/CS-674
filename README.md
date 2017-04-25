@@ -7,3 +7,5 @@ Homework 1: For time series data, implement 1-NN and _k_-NN with Euclidean dista
 Homework 2: Use time series motif discovery for classification.
 
 Homework 3: Presented the following paper on location-based social networks to my class: Cho, E., Myers, S. A., & Leskovec, J. (2011, August). Friendship and mobility: user movement in location-based social networks. In Proceedings of the 17th ACM SIGKDD international conference on Knowledge discovery and data mining (pp. 1082-1090). ACM.
+
+Homework 4: Using LDA for topic modeling on a text dataset and the MNIST handwritten digits dataset.
